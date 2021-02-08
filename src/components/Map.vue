@@ -1,14 +1,18 @@
 <template>
     <p v-if="loading">WAIT A SEC...</p>
-    <form @submit.prevent v-if="!loading">
+    <div class="filterForm">
+        <ToggleButton />
+        <form @submit.prevent v-if="!loading" id="filterForm">
         <label for="location">Location:</label><br>
         <input id="location" type="text"><br>
 
-        <label for="radius">Radius:</label><br>
-        <input type="range" id="radius" min="1" max="400" step="1" b-model="searchRadius">
-        <output class="range-out" for="range"></output>
+        <label for="rad">Radius</label><br>
+        <input type="range" id="rad" min="1" max="100" v-model="searchRadius"><br>
+        <label for="rad">{{ searchRadius }} km</label><br>
+        <label for="rad">Garbage Type:</label><br>
 
-    </form>
+        </form>
+    </div>
     <div id="mapid" ref="mapContainer" @click="updateLocation"></div>
 </template>
 
@@ -16,16 +20,17 @@
     import 'leaflet/dist/leaflet.css'
     import L from 'leaflet'
     import Geo from 'geolocation'
+    import ToggleButton from './ToggleButton'
 
     export default {
         name: 'Map.vue',
+        components: [ToggleButton],       
         data () {
             return {
                 longitude: 0,
                 latitude: 0,
                 loading: true,
                 searchRadius: 1,
-                tmpRad: 1,
                 wasteType: [],
             }
         },
@@ -51,14 +56,6 @@
             updateLocation() {
                 this.latitude = 0
             },
-            validateRad(e) {
-                if ((48 <= e.keyCode && e.keyCode <= 57) || e.keyCode == 8) {
-                    this.searchRadius = this.tmpRad
-                } else {
-                    this.tmpRad = this.searchRadius
-                }
-                console.log(this.searchRadius)
-            },
         },
         computed: {
         },
@@ -73,6 +70,18 @@
 </script>
 
 <style scoped>
+    .filterForm {
+        border: 1px solid#2c3e50;
+        width: 400px;
+        margin: auto;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        padding: 10px;
+    }
+    .filterToggle {
+        position: relative;
+        margin: auto; 
+    }
     #mapid{
         height: 600px;
         width: 70%;
