@@ -1,19 +1,8 @@
 <template>
-    <p v-if="loading">WAIT A SEC...</p>
-    <div class="filterForm">
-        <ToggleButton />
-        <form @submit.prevent v-if="!loading" id="filterForm">
-        <label for="location">Location:</label><br>
-        <input id="location" type="text"><br>
-
-        <label for="rad">Radius</label><br>
-        <input type="range" id="rad" min="1" max="100" v-model="searchRadius"><br>
-        <label for="rad">{{ searchRadius }} km</label><br>
-        <label for="rad">Garbage Type:</label><br>
-
-        </form>
+    <div>
+        <p v-if="loading">WAIT A SEC...</p>
+        <div id="mapid" ref="mapContainer" @click="updateLocation"></div>
     </div>
-    <div id="mapid" ref="mapContainer" @click="updateLocation"></div>
 </template>
 
 <script>
@@ -21,17 +10,15 @@
     import L from 'leaflet'
     import Geo from 'geolocation'
     import ToggleButton from './ToggleButton'
+    import FilterForm from './FilterForm'
 
     export default {
-        name: 'Map.vue',
-        components: [ToggleButton],       
+        name: 'Map.vue',     
         data () {
             return {
                 longitude: 0,
                 latitude: 0,
                 loading: true,
-                searchRadius: 1,
-                wasteType: [],
             }
         },
         methods: {
@@ -53,9 +40,6 @@
                     this.loading = false
                 })
             },
-            updateLocation() {
-                this.latitude = 0
-            },
         },
         computed: {
         },
@@ -70,28 +54,9 @@
 </script>
 
 <style scoped>
-    .filterForm {
-        border: 1px solid#2c3e50;
-        width: 400px;
-        margin: auto;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        padding: 10px;
-    }
-    .filterToggle {
-        position: relative;
-        margin: auto; 
-    }
     #mapid{
         height: 600px;
         width: 70%;
         margin: auto;
-    }
-    form > * {
-        margin: 10px;
-    }
-    #radius {
-        width: 50px;
-        margin-left: 20px;
     }
 </style>

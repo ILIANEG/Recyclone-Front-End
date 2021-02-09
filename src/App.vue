@@ -1,11 +1,15 @@
 <template>
-  <div id="nav">
-    <router-link :to="{name: 'FindBin'}">Find Bin</router-link>
-    <router-link :to="{name: 'AddLocation'}">Add Bin</router-link>
-    <router-link :to="{name: 'AboutUs'}">About Us</router-link>
-  </div>
-  <router-view/>
+  <Nav id="nav" />
+  <router-view id="routContent"/>
 </template>
+
+<script>
+import Nav from './components/Nav'
+
+export default {
+  components: {Nav}
+}
+</script>
 
 <style>
 
@@ -16,25 +20,11 @@
   text-align: center;
   color: #2c3e50;
 }
-
 #nav {
-  padding: 30px;
-  position: relative;
+  width: 80%;
+  margin: auto;
 }
-
-#nav a {
-  width: 90px;
-  display: inline-block;
-  font-weight: bold;
-  color: #2c3e50;
-  text-decoration: none;
-  margin-right: 30px;
-  padding: 8px;
-  border-radius: 5px;
-}
-
-#nav a.router-link-exact-active {
-  color: whitesmoke;
-  background-color: #42b983;
+#routContent {
+  margin-top: 40px;
 }
 </style>
