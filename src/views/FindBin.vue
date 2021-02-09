@@ -3,7 +3,7 @@
         <h1>Find Bin</h1>
         <ToggleButton id="searchFilterToggle" @buttonToggle="toggleFilterForm"/>
         <FilterForm id="searchFilterForm" v-if="showFilter"/>
-        <Map />
+        <Map :isClickable="false" />
     </div>
 </template>
 

@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <p class="navTitl">Recyclone</p>
+    <div class="body">
+        <p class="navTitl">RECYCLONE</p>
         <div class="elems">
             <router-link class="navElem" :to="{name: 'FindBin'}">Find Bin</router-link>
             <router-link class="navElem" :to="{name: 'AddLocation'}">Add Bin</router-link>
@@ -17,24 +17,29 @@ export default {
 </script>
 
 <style scoped>
-    #nav {
-        postion: fixed
+    .body {
+        background: #2c3e50;
+        color: whitesmoke
     }
     .navTitl {
         display: inline-block;
         float: left;
         padding: 5px;
         margin: 5px;
+        margin-left: 5%;
+        font-weight: bold;
+        letter-spacing: 2px;
     }
     .elems {
         display: inline-block;
-        float: right
+        float: right;
+        margin-right: 5%;
     }
     .navElem {
         display: inline-block;
         margin: 10px 25px;
+        color: whitesmoke;
         text-decoration: none;
-        color: #2c3e50;
         font-weight: bold
     }
     .router-link-exact-active {

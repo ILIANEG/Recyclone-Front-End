@@ -21,8 +21,7 @@ export default {
   color: #2c3e50;
 }
 #nav {
-  width: 80%;
-  margin: auto;
+  padding: 5px;
 }
 #routContent {
   margin-top: 40px;
