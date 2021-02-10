@@ -1,0 +1,9 @@
+{
+    "bins": [
+        {"id": 1, "lat": 45.27768544888877 , "long": -75.86347483188472, "wasteType":["paper", "plastic", "landfill"]},
+        {"id": 2, "lat": 45.27636615599587 , "long": -75.86441292729748, "wasteType":["paper", "plastic"]},
+        {"id": 3, "lat": 45.274840376206676 , "long": -75.86459585668258, "wasteType":["paper", "plastic", "electronic"]},
+        {"id": 4, "lat": 45.27440260735886 , "long": -75.86658729522426, "wasteType":["paper", "plastic"]},
+        {"id": 5, "lat": 45.27413197703124 , "long": -75.86753430560125, "wasteType":["paper", "plastic", "landfill"]} 
+    ]
+}
