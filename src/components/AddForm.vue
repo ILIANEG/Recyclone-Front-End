@@ -24,6 +24,7 @@
                 <BaseColorOptions class="colorSelection" />
             </select>
         </div>
+        <button class="btn" type="submit">Add</button>
         </form>
     </div>
 </template>
@@ -58,5 +59,16 @@ export default {
     }
     .garbageTypeSelector > * {
         margin: 5px
+    }
+    .btn {
+        display: block;
+        width: 100px;
+        margin: auto;
+        padding: 6px;
+        background-color: #42b983;
+        border: 1px solid #42b983;
+        border-radius: 5px;
+        color: #2c3e50;
+        font-weight: bold;
     }
 </style>

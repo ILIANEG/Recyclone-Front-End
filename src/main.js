@@ -4,7 +4,6 @@ import router from './router'
 
 createApp(App).use(router).mount('#app')
 
-
 // eslint-disable-next-line  
 delete L.Icon.Default.prototype._getIconUrl  
 // eslint-disable-next-line  

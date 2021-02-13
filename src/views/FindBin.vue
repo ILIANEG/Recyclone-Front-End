@@ -11,7 +11,6 @@
 import Map from '../components/Map'
 import ToggleButton from '../components/ToggleButton'
 import FilterForm from '../components/FilterForm'
-import Geo from 'geolocation'
 import bus from 'vue3-eventbus'
 
 export default {
@@ -19,8 +18,9 @@ export default {
     data () {
         return {
             showFilter: false,
-            lat: 0,
-            long: 0,
+            lat: 45.41117,
+            long: -75.69812,
+            rad: 1,
             bins: []
         }
     },
@@ -29,6 +29,7 @@ export default {
             this.showFilter = !this.showFilter
         },
         applyFilter(formObject) {
+            this.rad = formObject.radius
             var adress = formObject.location.trim().replace(' ', '%20')
             fetch(`https://us1.locationiq.com/v1/search.php?key=pk.9dc4852939a1766bbd3827f072b48473&q=${adress}&format=json`)
             .then(res => {
@@ -47,28 +48,21 @@ export default {
             this.toggleFilterForm()
         },
         fetchBins() {
-            //TEMPORARY FILLER WITH DUMMY SERVER
-            return fetch('http://localhost:3000/bins', {
+            let link = `http://localhost:3000/public/bins?geo=${this.lat},${this.long}&rad=${this.rad}`
+            return fetch(link, {
                 method: 'GET',
                 'Content-Type':'application/json'
             })
         }
     },
     mounted() {
-        Geo.getCurrentPosition((err, position) => {
-            if (!err) {
-                this.lat = position.coords.latitude
-                this.long = position.coords.longitude
-            } else {
-                console.log('Location Access Denied, showing Ottawa');
-                this.lat = 45.41117
-                this.long = -75.69812
-            }
-        })
-        this.fetchBins().then(response => {
-            response.json().then(data => {
-                this.bins = data
-                bus.emit('renderRequest', {lat: this.lat, long: this.long, bins: this.bins})
+        navigator.geolocation.getCurrentPosition(pos => {
+            this.lat = pos.coords.latitude
+            this.long = pos.coords.longitude
+            this.fetchBins(1).then(response => {
+                response.json().then(data => {
+                    bus.emit('renderRequest', {lat: this.lat, long: this.long, bins: data})
+                })
             })
         })
     }

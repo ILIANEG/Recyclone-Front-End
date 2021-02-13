@@ -52,7 +52,7 @@ export default {
     },
     methods: {
         renderMap(lat, long, bins) {
-            this.loading = true
+            this.map.setView([lat, long], 13)
             const layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
                 .addTo(this.map)
@@ -61,29 +61,27 @@ export default {
                     this.map.on('click', e => {
                     if(this.clickable) {
                         var marker = L.marker(e.latlng, {icon: yellowIcon, draggable: true}).addTo(this.map)
-                        this.markerLocation = marker.getLatLng()
+                        this.$emit('markerManipulation', marker.getLatLng())
                         marker.on('drag', e => {
-                            this.markerLocation = marker.getLatLng()
+                            this.$emit('markerManipulation', marker.getLatLng())
                         })
                         this.clickable = false;
                     }
                 })
                 for (let i = 0; i < bins.length; i++) {
-                    L.marker([bins[i].lat, bins[i].long], {icon: greenIcon}).addTo(this.map)
+                    L.marker([bins[i].latitude, bins[i].longitude], {icon: greenIcon}).addTo(this.map)
                 }
                 this.loading = false
+
         },
     },
+    // Hook triggered on mounting of element, it is initial map rendering
     mounted() {
-        this.map = L.map(this.$refs.mapContainer, {preferCanvas: true})
+         this.map = L.map(this.$refs.mapContainer, {preferCanvas: true})
         bus.on('renderRequest', e => {
-            this.map.setView([e.lat, e.long], 13)
             this.renderMap(e.lat, e.long, e.bins)
         })
     },
-    beforeUnmount () {
-        //delete map
-    }
 }
 
 </script>
