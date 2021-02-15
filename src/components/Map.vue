@@ -54,10 +54,7 @@ export default {
         async renderMap(lat, long, rad) {
             this.position = {lat: lat, long: long}
             this.rad = rad
-            console.log('here')
-            const data = await this.fetchBins()
-            console.log('here')
-            console.log(data)
+            const bins = await this.fetchBins()
             this.map.setView([this.position.lat, this.position.long], 13)
             const layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
@@ -74,7 +71,6 @@ export default {
                     }
                 })
                 for (let i = 0; i < bins.length; i++) {
-                    console.log(bins)
                     L.marker([bins[i].lat, bins[i].long], {icon: greenIcon}).addTo(this.map)
                 }
                 this.loading = false
