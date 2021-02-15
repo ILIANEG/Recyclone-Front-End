@@ -38,26 +38,31 @@ var greenIcon = new L.Icon({
 });
 
 export default {
-    props: 
-    {
-        isClickable: Boolean,
-    },
     name: 'Map.vue',     
     data () {
         return {
             map: null,
-            clickable: this.isClickable,
+            clickable: this.clickable,
             loading: true,
+            position: {lat: 0, long: 0},
+            bins: [],
+            rad: 1,
+            clickable: Boolean,
         }
     },
     methods: {
-        renderMap(lat, long, bins) {
-            this.map.setView([lat, long], 13)
+        async renderMap(lat, long, rad) {
+            this.position = {lat: lat, long: long}
+            this.rad = rad
+            console.log('here')
+            const data = await this.fetchBins()
+            console.log('here')
+            console.log(data)
+            this.map.setView([this.position.lat, this.position.long], 13)
             const layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
                 .addTo(this.map)
-
-                L.marker([lat, long], {icon: blueIcon}).addTo(this.map).bindPopup('You')
+                L.marker([this.position.lat, this.position.long], {icon: blueIcon}).addTo(this.map).bindPopup('You')
                     this.map.on('click', e => {
                     if(this.clickable) {
                         var marker = L.marker(e.latlng, {icon: yellowIcon, draggable: true}).addTo(this.map)
@@ -69,17 +74,35 @@ export default {
                     }
                 })
                 for (let i = 0; i < bins.length; i++) {
-                    L.marker([bins[i].latitude, bins[i].longitude], {icon: greenIcon}).addTo(this.map)
+                    console.log(bins)
+                    L.marker([bins[i].lat, bins[i].long], {icon: greenIcon}).addTo(this.map)
                 }
                 this.loading = false
-
         },
+        fetchBins() {
+            return new Promise((resolve, reject) => {
+                let link = `http://localhost:3000/public/bins?lat=${this.lat}&long=${this.long}&rad=${this.rad}`
+                return fetch(link, {
+                method: 'GET',
+                'Content-Type':'application/json'
+                }).then(res => {
+                    if(400 <= res.status) {
+                        reject([])
+                    } else {
+                        return res.json()
+                    }
+                }).then(data => {
+                    resolve(data)
+                })
+            })
+        }
     },
     // Hook triggered on mounting of element, it is initial map rendering
     mounted() {
-         this.map = L.map(this.$refs.mapContainer, {preferCanvas: true})
-        bus.on('renderRequest', e => {
-            this.renderMap(e.lat, e.long, e.bins)
+        navigator.geolocation.getCurrentPosition(pos => {
+            this.position = {lat: pos.coords.latitude, long: pos.coords.longitude}
+            this.map = L.map('mapid').setView([this.position.lat, this.position.long], 13);
+            this.renderMap(this.position.lat, this.position.long, this.radius)
         })
     },
 }
