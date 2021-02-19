@@ -6,91 +6,102 @@
 </template>
 
 <script>
-    import 'leaflet/dist/leaflet.css'
-    import L from 'leaflet'
-    import Geo from 'geolocation'
 
-    export default {
-        props: {isClickable: Boolean},
-        name: 'Map.vue',     
-        data () {
-            return {
-                longitude: 0,
-                latitude: 0,
-                loading: true,
-                map: null,
-                clickable: this.isClickable,
-                markerLocation: []
-            }
-        },
-        methods: {
-            renderMap() {
-                this.loading = true
-                Geo.getCurrentPosition((err, position) => {
-                    if (!err) {
-                        this.longitude = position.coords.longitude
-                        this.latitude = position.coords.latitude
-                        this.map = L.map(this.$refs.mapContainer, {preferCanvas: true}).setView([this.latitude, this.longitude], 13)
-                    } else {
-                        console.log('Location Access Denied, showing Ottawa');
-                        this.map = L.map(this.$refs.mapContainer, {preferCanvas: true}).setView([45.41117, -75.69812], 13)
-                    }
-                    const layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
-                        .addTo(this.map)
-                    var blueIcon = new L.Icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34],
-                        shadowSize: [41, 41]
-                    });
-                    L.marker([this.latitude, this.longitude], {icon: blueIcon}).addTo(this.map).bindPopup('You')
-                    this.fetchBins()
-                    if(this.clickable) {
-                        var yellowIcon = new L.Icon({
-                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        });
-                        this.map.on('click', e => {
-                            console.log(this.markerLocation)
-                            if(this.clickable) {
-                                var marker = L.marker(e.latlng, {icon: yellowIcon, draggable: true}).addTo(this.map)
-                                this.markerLocation = marker.getLatLng()
-                                marker.on('drag', e => {
-                                    this.markerLocation = marker.getLatLng()
-                                })
-                                this.clickable = false;
-                            }
-                        })
-                    }
-                    this.loading = false
-                })
-            },
-            fetchBins() {
-                var greenIcon = new L.Icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34],
-                        shadowSize: [41, 41]
-                });
-                 L.marker([this.latitude-3, this.longitude], {icon: greenIcon}).addTo(this.map).bindPopup('Bin Info')
-                 L.marker([this.latitude-2, this.longitude], {icon: greenIcon}).addTo(this.map).bindPopup('Bin Info')
-            },
-        },
-        mounted () {
-            this.renderMap()
-        },
-        beforeUnmount () {
-            //delete map
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
+import bus from 'vue3-eventbus'
+
+var blueIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+var yellowIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+var greenIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+export default {
+    name: 'Map.vue',     
+    data () {
+        return {
+            map: null,
+            clickable: this.clickable,
+            loading: true,
+            position: {lat: 0, long: 0},
+            bins: [],
+            rad: 1,
+            clickable: Boolean,
         }
+    },
+    methods: {
+        async renderMap(lat, long, rad) {
+            if (lat != null && long != null) {
+                this.position = {lat: lat, long: long}
+            }
+            this.rad = rad
+            const bins = await this.fetchBins()
+            this.map.setView([this.position.lat, this.position.long], 13)
+            const layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+                .addTo(this.map)
+                L.marker([this.position.lat, this.position.long], {icon: blueIcon}).addTo(this.map).bindPopup('You')
+                    this.map.on('click', e => {
+                    if(this.clickable) {
+                        var marker = L.marker(e.latlng, {icon: yellowIcon, draggable: true}).addTo(this.map)
+                        this.$emit('markerManipulation', marker.getLatLng())
+                        marker.on('drag', e => {
+                            this.$emit('markerManipulation', marker.getLatLng())
+                        })
+                        this.clickable = false;
+                    }
+                })
+                for (let i = 0; i < bins.length; i++) {
+                    L.marker([bins[i].latitude, bins[i].longitude], {icon: greenIcon}).addTo(this.map)
+                }
+                this.loading = false
+        },
+        fetchBins() {
+            return new Promise((resolve, reject) => {
+                let link = `http://localhost:3000/public/bins?lat=${this.position.lat}&long=${this.position.long}&rad=${this.rad}`
+                return fetch(link, {
+                method: 'GET',
+                'Content-Type':'application/json'
+                }).then(res => {
+                    if(400 <= res.status) {
+                        reject([])
+                    } else {
+                        return res.json()
+                    }
+                }).then(data => {
+                    resolve(data)
+                })
+            })
+        }
+    },
+    // Hook triggered on mounting of element, it is initial map rendering
+    mounted() {
+        navigator.geolocation.getCurrentPosition(pos => {
+            this.position = {lat: pos.coords.latitude, long: pos.coords.longitude}
+            this.map = L.map('mapid').setView([this.position.lat, this.position.long], 13);
+            this.renderMap(this.position.lat, this.position.long, this.radius)
+        })
+    },
 }
 
 </script>
