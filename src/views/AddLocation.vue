@@ -1,7 +1,8 @@
 <template>
 <div>
   <h1>Add Location</h1>
-  <AddForm class="addForm" @submit="submitForm" />
+  <Error v-if="this.error" @click="error=false" />
+  <AddForm class="addForm" @formSubmit="submitForm" @formValidationError="error = true"/>
   <Map :isClickable="true" @markerManipulation="updateMarker" />
 </div>
 </template>
@@ -9,11 +10,11 @@
 <script>
 import Map from '../components/Map'
 import AddForm from '../components/AddForm'
-import Geo from 'geolocation'
 import bus from 'vue3-eventbus'
+import Error from '../components/Error.vue'
 
 export default {
-  components: {Map, AddForm},
+  components: {Map, AddForm, Error},
   data() {
     return {
             showFilter: false,
@@ -21,23 +22,56 @@ export default {
             long: -75.69812,
             bins: [],
             selectionMarker: null,
+            error: false
         }
   },
   methods: {
     fetchBins() {
-      //TEMPORARY FILLER WITH DUMMY SERVER
-      let link = `http://localhost:3000/public/bins?geo=${this.lat},${this.long}&rad=2`
+      let link = `http://localhost:3000/public/bins?lat=${this.lat}&long=${this.long}&rad=5`
       return fetch(link, {
         method: 'GET',
         'Content-Type':'application/json'
       })
     },
-    // Validation to be implemented
+    sendBin(binObject) {
+      console.log(binObject)
+      let link = 'http://localhost:3000/public/bins'
+      return fetch(link, {
+        method: 'POST',
+        body: JSON.stringify(binObject),
+        headers: {'Content-Type': 'application/json'}
+      })
+    },
     submitForm(formObject) {
-      comsole.log({formObject})
+      if(this.formValidation(formObject)) {
+        formObject.color.forEach((value, key) => {
+          let binObject = 
+            {
+              longitude: this.selectionMarker.lng,
+              latitude: this.selectionMarker.lat,
+              type: key,
+              color: value,
+            }
+          this.sendBin(binObject).then(console.log('success'))
+        })
+      } else {
+        this.error = true
+      }
     },
     updateMarker(e) {
       this.selectionMarker = e
+    },
+    formValidation(formObject) {
+      if (0 < formObject.rad && formObject.rad < 200 && this.selectionMarker) {
+        for (let i = 0; i < formObject.waste.length; i++) {
+          if(!formObject.color.has(formObject.waste[i])) {
+            return false
+          }
+        }
+        return true
+      } else {
+        return false
+      }
     }
   },
   mounted() {

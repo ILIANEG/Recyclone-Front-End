@@ -80,6 +80,10 @@ export default {
         border-radius: 5px;
         color: #2c3e50;
         font-weight: bold;
+<<<<<<< HEAD
+=======
+        cursor: pointer;
+>>>>>>> b4a1301f67ee4df047cd4235dfaae6be4f7b41f4
     }
     p {
         font-weight: bold;

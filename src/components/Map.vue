@@ -9,7 +9,6 @@
 
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
-import Geo from 'geolocation'
 import bus from 'vue3-eventbus'
 
 var blueIcon = new L.Icon({
@@ -52,7 +51,9 @@ export default {
     },
     methods: {
         async renderMap(lat, long, rad) {
-            this.position = {lat: lat, long: long}
+            if (lat != null && long != null) {
+                this.position = {lat: lat, long: long}
+            }
             this.rad = rad
             const bins = await this.fetchBins()
             this.map.setView([this.position.lat, this.position.long], 13)
@@ -71,13 +72,13 @@ export default {
                     }
                 })
                 for (let i = 0; i < bins.length; i++) {
-                    L.marker([bins[i].lat, bins[i].long], {icon: greenIcon}).addTo(this.map)
+                    L.marker([bins[i].latitude, bins[i].longitude], {icon: greenIcon}).addTo(this.map)
                 }
                 this.loading = false
         },
         fetchBins() {
             return new Promise((resolve, reject) => {
-                let link = `http://localhost:3000/public/bins?lat=${this.lat}&long=${this.long}&rad=${this.rad}`
+                let link = `http://localhost:3000/public/bins?lat=${this.position.lat}&long=${this.position.long}&rad=${this.rad}`
                 return fetch(link, {
                 method: 'GET',
                 'Content-Type':'application/json'

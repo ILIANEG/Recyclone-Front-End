@@ -26,17 +26,21 @@ export default {
         },
         applyFilter(formObject) {
             var rad = formObject.radius
-            var adress = formObject.location.trim().replace(' ', '%20')
-            fetch(`https://us1.locationiq.com/v1/search.php?key=pk.9dc4852939a1766bbd3827f072b48473&q=${adress}&format=json`)
-            .then(res => {
-                res.json().then(data => {
-                    console.log(data)
-                    console.log(data[0].lat)
-                    var lat = data[0].lat
-                    var long = data[0].lon
-                    bus.emit('renderRequest', {lat: lat, long: long, rad: rad})
+            if (formObject.location) {
+                var adress = formObject.location.trim().replace(' ', '%20')
+                fetch(`https://us1.locationiq.com/v1/search.php?key=pk.9dc4852939a1766bbd3827f072b48473&q=${adress}&format=json`)
+                .then(res => {
+                    res.json().then(data => {
+                        console.log(data)
+                        console.log(data[0].lat)
+                        var lat = data[0].lat
+                        var long = data[0].lon
+                        bus.emit('renderRequest', {lat: lat, long: long, rad: rad})
+                    })
                 })
-            })
+            } else {
+                bus.emit('renderRequest', null, null, rad)
+            }
             this.toggleFilterForm()
         },
     },
